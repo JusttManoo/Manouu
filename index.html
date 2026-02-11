@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mano</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        
+        body {
+            height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        /* --- LỚP NỀN RIÊNG BIỆT --- */
+        #bg-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('bg/Background_Main.png');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            z-index: -1;
+            transition: filter 0.4s ease;
+        }
+        #bg-layer.blur-active { filter: blur(10px); }
+
+        /* --- NỘI DUNG CHÍNH --- */
+        .main-content { 
+            text-align: center; width: 100%; padding: 0 20px;
+            transition: filter 0.4s ease, opacity 0.4s ease;
+        }
+        .main-content.blur-active {
+            filter: blur(10px);
+            opacity: 0.7;
+            pointer-events: none; 
+        }
+        
+        /* --- NÚT MENU --- */
+        .menu-btn {
+            position: absolute; top: 25px; right: 25px;
+            width: 50px; height: 50px;
+            z-index: 100; cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center;
+            gap: 6px;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), background 0.3s;
+        }
+
+        .menu-btn span {
+            display: block;
+            width: 26px; height: 3px;
+            background-color: white;
+            border-radius: 4px;
+            transition: 0.4s;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .menu-btn.active {
+            transform: rotate(90deg);
+            border-color: #9b59b6;
+        }
+        .menu-btn.active span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+        .menu-btn.active span:nth-child(2) { opacity: 0; transform: translateX(-10px); }
+        .menu-btn.active span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            position: fixed; top: 0; right: -350px;
+            width: 280px; height: 100%;
+            background: rgba(15, 5, 30, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 90px 20px 20px 20px; z-index: 99;
+            border-radius: 30px 0 0 30px; 
+            border-left: 1px solid rgba(255,255,255,0.1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+        }
+        .sidebar.active { right: 0; }
+
+        /* --- CẬP NHẬT: HIỆU ỨNG SHINE CHO NÚT SIDEBAR --- */
+        .sidebar a {
+            display: flex; align-items: center;
+            padding: 15px 20px; text-decoration: none;
+            color: #fff; font-size: 16px; font-weight: 600;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+            /* Thêm 2 dòng này để chứa ánh sáng */
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Tạo luồng sáng cho Sidebar */
+        .sidebar a::after {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: skewX(-25deg); transition: none;
+            pointer-events: none; /* Để không chắn click chuột */
+        }
+
+        .sidebar a:hover {
+            background: rgba(155, 89, 182, 0.5);
+            padding-left: 25px;
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);
+        }
+        
+        /* Kích hoạt luồng sáng khi hover Sidebar */
+        .sidebar a:hover::after {
+            left: 150%; transition: left 0.6s;
+        }
+
+        .sidebar img { width: 25px; height: 25px; margin-right: 15px; border-radius: 5px; }
+
+        /* --- AVATAR & CONTENT --- */
+        .avatar-wrapper {
+            display: inline-block;
+            text-decoration: none;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        /* --- CẬP NHẬT: HIỆU ỨNG SHINE CHO AVATAR --- */
+        .avatar-circle {
+            width: 120px; height: 120px;
+            background-image: url('icons/GithubAVT.png');
+            background-size: cover; border-radius: 50%;
+            border: 3px solid #9b59b6;
+            box-shadow: 0 0 20px #9b59b6;
+            transition: box-shadow 0.3s, border-color 0.3s;
+            /* Thêm 2 dòng này để chứa ánh sáng trong hình tròn */
+            position: relative;
+            overflow: hidden; 
+        }
+
+        /* Tạo luồng sáng cho Avatar */
+        .avatar-circle::after {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: skewX(-25deg); transition: none;
+            pointer-events: none;
+        }
+
+        .avatar-wrapper:hover { transform: scale(1.1); }
+        .avatar-wrapper:hover .avatar-circle {
+            box-shadow: 0 0 50px #d2b4de; border-color: #fff;
+        }
+        
+        /* Kích hoạt luồng sáng khi hover vào wrapper */
+        .avatar-wrapper:hover .avatar-circle::after {
+            left: 150%; transition: left 0.6s;
+        }
+
+        .title-name {
+            color: white; font-size: 32px; font-weight: bold; margin-bottom: 30px;
+            text-shadow: 0 0 15px #9b59b6;
+        }
+
+        .btn-container { display: flex; gap: 20px; justify-content: center; }
+        
+        .btn {
+            position: relative;
+            padding: 15px 0; width: 180px;
+            font-size: 18px; font-weight: bold;
+            color: #e0ccff; 
+            background: rgba(74, 0, 114, 0.3); 
+            border: 2px solid #000; 
+            border-radius: 50px; 
+            backdrop-filter: blur(8px);
+            cursor: pointer; text-decoration: none;
+            overflow: hidden; text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+            display: inline-block;
+        }
+        .btn:hover { 
+            transform: scale(1.05);
+            background: rgba(74, 0, 114, 0.5); 
+            box-shadow: 0 0 25px rgba(155, 89, 182, 0.5);
+            border-color: #555;
+        }
+        .btn::after {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: skewX(-25deg); transition: none;
+        }
+        .btn:hover::after { left: 150%; transition: left 0.6s; }
+
+        @media (max-width: 768px) {
+            .btn-container { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: 280px; }
+            .sidebar { width: 85%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-layer"></div>
+
+    <div class="menu-btn" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div class="sidebar" id="sidebar">
+        <a href="https://youtube.com/@justtmanoo" target="_blank"><img src="icons/YouTube.png"> YouTube</a>
+        <a href="https://zalo.me/g/vzbrod229" target="_blank"><img src="icons/Zalo.png"> Zalo</a>
+        <a href="https://github.com/justtmanoo" target="_blank"><img src="icons/Github.png"> Github</a>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <a href="https://youtube.com/@justtmanoo" target="_blank" class="avatar-wrapper">
+            <div class="avatar-circle"></div>
+        </a>
+        <div class="title-name">Mano</div>
+        <div class="btn-container">
+            <a href="files/tool/FileTool.py" download class="btn">Tải Tool</a>
+            <a href="obfuscator.html" class="btn">Obfuscator</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const bgLayer = document.getElementById('bg-layer');
+            const menuBtn = document.querySelector('.menu-btn');
+            
+            sidebar.classList.toggle('active');
+            menuBtn.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                mainContent.classList.add('blur-active');
+                bgLayer.classList.add('blur-active');
+            } else {
+                mainContent.classList.remove('blur-active');
+                bgLayer.classList.remove('blur-active');
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.menu-btn');
+            const mainContent = document.getElementById('mainContent');
+            const bgLayer = document.getElementById('bg-layer');
+
+            if (!sidebar.contains(event.target) && !menuBtn.contains(event.target) && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                menuBtn.classList.remove('active');
+                mainContent.classList.remove('blur-active');
+                bgLayer.classList.remove('blur-active');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mano Obfuscator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        
+        html, body {
+            width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; position: fixed;
+        }
+
+        body {
+            background-color: #1a0b2e;
+            background-image: url('./Main_Background.gif'); 
+            background-size: cover; background-position: center;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        #bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            opacity: 0; transition: opacity 0.4s ease-out; z-index: -1; pointer-events: none;
+        }
+
+        .container {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; 
+            width: 100%; max-width: 600px; z-index: 1; max-height: 100%;
+        }
+
+        /* --- NÚT BẤM VỚI HIỆU ỨNG ÁNH SÁNG --- */
+        .obs-btn {
+            width: 100%; height: 70px; 
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 900;
+            text-decoration: none;
+            background-size: cover; background-position: center;
+            position: relative; overflow: hidden; /* Quan trọng cho vệt sáng */
+            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-transform: uppercase; letter-spacing: 1px;
+            backdrop-filter: blur(2px);
+            user-select: none; -webkit-user-select: none;
+        }
+
+        /* Hiệu ứng vệt sáng kim loại */
+        .obs-btn::after, .back-home::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            z-index: 2;
+            transition: none;
+        }
+
+        .obs-btn:hover::after, .back-home:hover::after {
+            left: 150%;
+            transition: left 0.7s ease-in-out;
+        }
+
+        .btn-obsidian { background-image: url('buttons/Obsidian.png'); color: #30004a; }
+        .btn-apil { background-image: url('buttons/April26.png'); color: #d8b4fe; }
+        .btn-amethyst { background-image: url('buttons/Amethyst.png'); color: #9966cc; }
+        .btn-frieren { background-image: url('buttons/Frieren.png'); color: #add8e6; }
+
+        .obs-btn:hover { transform: scale(1.05); z-index: 10; border-color: white; }
+
+        .back-home {
+            position: fixed; top: 20px; left: 20px;
+            color: white; text-decoration: none; font-weight: bold;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid #000; padding: 10px 20px; border-radius: 30px;
+            z-index: 100; backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, background-color 0.2s;
+            overflow: hidden; /* Cho vệt sáng */
+        }
+
+        .back-home:hover, .back-home:active {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; gap: 15px; max-width: 350px; }
+            .obs-btn { height: 80px; font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-overlay"></div>
+    <a href="index.html" class="back-home">⬅ Quay lại</a>
+    <div class="container">
+        <a href="files/obfuscator/Obsi312.py" download class="obs-btn btn-obsidian" data-bg="buttons/Obsidian.png">Obsidian</a>
+        <a href="comingsoon.html" class="obs-btn btn-apil" data-bg="buttons/April26.png">April26</a>
+        <a href="comingsoon.html" class="obs-btn btn-amethyst" data-bg="buttons/Amethyst.png">Amethyst11</a>
+        <a href="comingsoon.html" class="obs-btn btn-frieren" data-bg="buttons/Frieren.png">Frieren</a>
+    </div>
+    <script>
+        const overlay = document.getElementById('bg-overlay');
+        const buttons = document.querySelectorAll('.obs-btn');
+        document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+        function changeBackground(imageUrl) { if (!imageUrl) return; overlay.style.backgroundImage = `url('${imageUrl}')`; overlay.style.opacity = '1'; }
+        function resetBackground() { overlay.style.opacity = '0'; }
+        buttons.forEach(btn => {
+            const bgImage = btn.getAttribute('data-bg');
+            if(bgImage) { const img = new Image(); img.src = bgImage; }
+            btn.addEventListener('mouseenter', () => changeBackground(bgImage));
+            btn.addEventListener('mouseleave', resetBackground);
+            btn.addEventListener('touchstart', () => changeBackground(bgImage), { passive: true });
+            btn.addEventListener('touchend', resetBackground);
+            btn.addEventListener('touchcancel', resetBackground);
+        });
+    </script>
+</body>
+</html>
